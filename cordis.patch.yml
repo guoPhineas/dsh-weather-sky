@@ -1,0 +1,6 @@
+# weather-sky overlay bundle patch: inserts this package's public dsh.client
+# entry into the web plugin roster. Install with:
+#   dsh plugin --profile <name> add <path-or-git-url>
+- insert:
+    - id: weather-sky
+      name: '@dsh-external/dsh-weather-sky'

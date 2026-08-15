@@ -1,51 +1,21 @@
 {
-  "name": "@deepseek-ai/dsh-weather-sky",
-  "description": "Weather & Sky: IP-based live weather visualization for the DeepSeek Harness browser UI (sun/moon with phases, clouds, rain/snow/fog/thunder) with conversation controls.",
-  "version": "0.1.0-rc.1",
-  "publishConfig": {
-    "access": "public"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/<your-org>/dsh-weather-sky.git"
-  },
+  "name": "@dsh-external/dsh-weather-sky",
+  "description": "Weather & Sky: a hot-pluggable live weather overlay for the DeepSeek Harness web GUI (sun by day, moon with phases by night, clouds, rain, snow, fog, lightning).",
+  "version": "0.1.0",
+  "private": true,
   "type": "module",
   "main": "lib/index.js",
-  "types": "lib/index.d.ts",
   "exports": {
-    ".": {
-      "types": "./lib/index.d.ts",
-      "default": "./lib/index.js"
-    },
-    "./invariant": {
-      "types": "./lib/invariant.d.ts",
-      "default": "./lib/invariant.js"
-    },
-    "./client": {
-      "types": "./lib/client.d.ts",
-      "default": "./lib/client.js"
-    },
-    "./types": {
-      "types": "./lib/types.d.ts",
-      "default": "./lib/types.js"
-    },
-    "./typert": {
-      "types": "./lib/typert.host.d.ts",
-      "default": "./lib/typert.host.js"
-    },
-    "./remote": {
-      "types": "./lib/typert.remote-client.d.ts",
-      "default": "./lib/typert.remote-client.js"
-    },
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
     "./package.json": "./package.json"
   },
   "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
     "client": {
-      "inject": [
-        "@deepseek-ai/dsh-client-runtime",
-        "@deepseek-ai/dsh-client-ui-slots",
-        "@deepseek-ai/dsh-api-remotes"
-      ],
+      "inject": [],
       "platform": "web"
     }
   },
@@ -53,43 +23,22 @@
     "build": "tsdown",
     "watch": "tsdown --watch"
   },
-  "files": [
-    "lib/index.js",
-    "lib/index.d.ts",
-    "lib/invariant.js",
-    "lib/invariant.d.ts",
-    "lib/client.js",
-    "lib/client.d.ts",
-    "lib/types.js",
-    "lib/types.d.ts",
-    "lib/typert.host.js",
-    "lib/typert.host.d.ts",
-    "lib/typert.remote-client.js",
-    "lib/typert.remote-client.d.ts"
-  ],
   "license": "MIT",
-  "dependencies": {
-    "@deepseek-ai/dsh-tools": "workspace:^",
-    "@deepseek-ai/dsh-typert-protocol": "workspace:^"
-  },
   "peerDependencies": {
-    "@deepseek-ai/cordis": "workspace:^",
-    "@deepseek-ai/dsh-api-remotes": "workspace:^",
-    "@deepseek-ai/dsh-client-runtime": "workspace:^",
-    "@deepseek-ai/dsh-client-ui-slots": "workspace:^",
-    "@deepseek-ai/dsh-invariants": "workspace:^",
-    "react": "^18.2.0"
+    "@deepseek-ai/cordis": "^4.0.1"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "workspace:^",
-    "@deepseek-ai/dsh-api-remotes": "workspace:^",
-    "@deepseek-ai/dsh-client-runtime": "workspace:^",
-    "@deepseek-ai/dsh-client-ui-slots": "workspace:^",
-    "@deepseek-ai/dsh-invariants": "workspace:^",
-    "@deepseek-ai/dsh-typert-generator": "workspace:^",
-    "@types/react": "~18.3.1",
-    "react": "^18.2.0",
-    "tsdown": "workspace:^",
+    "@deepseek-ai/cordis": "^4.0.1",
+    "tsdown": "^0.22.14",
     "typescript": "^5.5.0"
-  }
+  },
+  "files": [
+    "lib/index.js",
+    "lib/client.js",
+    "cordis.patch.yml",
+    "src",
+    "README.md",
+    "README.en.md",
+    "LICENSE"
+  ]
 }

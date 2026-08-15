@@ -2,7 +2,9 @@
 
 [中文](./README.md)
 
-A DeepSeek Harness (DSH) plugin that overlays a **live weather & sky animation** on the browser UI: sun by day, moon with real phases by night, plus clouds, rain (intensity-aware), snow, fog, and periodic lightning. It geolocates the user by IP, fetches live weather from Open-Meteo (no API key), and registers conversation tools to change the place, force a condition, or view a forecast.
+A DeepSeek Harness (DSH) Web GUI plugin that overlays a **live weather & sky animation**: sun by day, moon with real phases by night, plus clouds, rain (intensity-aware), snow, fog, and periodic lightning.
+
+Weather is fetched **in the browser** from Open-Meteo (no API key), with location resolved via `navigator.geolocation` (falling back to `ipwho.is`).
 
 ---
 
@@ -10,15 +12,13 @@ A DeepSeek Harness (DSH) plugin that overlays a **live weather & sky animation**
 
 | Capability | Description |
 | --- | --- |
-| IP geolocation | `ipwho.is` → `ipapi.co` (free, no key) |
-| Live weather | Open-Meteo `current` (temperature, weather code, day/night, wind, cloud, precipitation) |
-| Forecast | `weather_set_time` views a future moment (e.g. "tomorrow 14:00") |
+| Geolocation | Browser geolocation first, IP geolocation (`ipwho.is`) fallback |
+| Live weather | Open-Meteo (no key): temperature, weather code, day/night, cloud, precipitation |
 | Day / night | sun by day, moon + stars by night |
 | Moon phases | new → waxing crescent → first quarter → waxing gibbous → full → … → waning crescent |
 | Celestial motion | sun arcs east→zenith→west by solar time; moon arcs by time + phase |
 | Weather visuals | clouds, rain (scales with intensity), snow, fog, thunderstorm lightning (~6s) |
 | Text-friendly | `pointer-events:none` overlay, low opacity, translucent status chip |
-| Conversation tools | `weather_set_location`, `weather_set_condition`, `weather_set_time`, `weather_reset` |
 
 ---
 
@@ -39,29 +39,36 @@ A DeepSeek Harness (DSH) plugin that overlays a **live weather & sky animation**
 
 ---
 
-## Directory layout
+## Installation
+
+### Quick start
+
+Tell your dsh:
 
 ```
-src/
-├── index.ts          # Host half: WeatherSkyService (TypertRemoteService + @Remote)
-├── invariant.ts      # Invariant companion
-├── types.ts          # Shared types (WeatherSnapshot, WeatherCondition, …)
-└── client/index.ts   # Client half: shell.overlay animation layer
-tsdown.config.ts      # Build (tsdown + typert generator)
-package.json          # Manifest with dsh.client, exports, peerDeps
+Install this weather plugin: https://github.com/guoPhineas/dsh-weather-sky
+```
+
+### CLI
+
+```sh
+git clone https://github.com/guoPhineas/dsh-weather-sky
+cd <harness>
+dsh plugin --profile web add ../dsh-weather-sky
 ```
 
 ---
 
-## Architecture
+## Directory layout
 
-- **Host half** provides the `weatherSky` service with one remote method:
-  `@Remote('getWeather')` → returns a `WeatherSnapshot` (lossless JSON).
-- **Client half** consumes it through the generated Typert binding
-  `ctx.remote.weatherSky.getWeather()`, polls every 15s, and renders the overlay
-  into the `shell.overlay` slot.
-- **Networking**: prefers `ctx.web.fetch`, falls back to `ctx.shell` running
-  `curl` when no HTTP fetch provider is mounted.
+```
+src/
+├── index.ts            # Host half (empty apply; browser-only plugin)
+└── client/index.ts     # Client half: weather fetch + DOM/CSS animation layer
+cordis.patch.yml        # bundle patch (inserts this package's dsh.client entry)
+tsdown.config.ts        # build (tsdown)
+package.json            # manifest: dsh.bundle.patch, dsh.client, peerDeps
+```
 
 ---
 
@@ -69,46 +76,18 @@ package.json          # Manifest with dsh.client, exports, peerDeps
 
 ```sh
 pnpm install
-pnpm build   # tsdown + typert generation
+pnpm build   # tsdown
 ```
 
-The Typert generator emits `lib/typert.host.js` and `lib/typert.remote-client.js`
-for the `@Remote` method. It locates the workspace root by walking up to the
-nearest `tsconfig.host.json`; for a standalone repo, place a `tsconfig.host.json`
-(and `tsconfig.client.json`) at the root that mirrors the DSH base options.
+Output goes to `lib/` (`index.js` host entry, `client.js` browser half).
 
 ---
 
-## Installation
+## Notes
 
-DSH composes plugins as rows in a `cordis.yml` / bundle patch. To wire this
-package in and make it available to other users:
-
-1. Place it in the DSH repo (or a fork) at `packages/extension/weather-sky`.
-2. Add a row to the target bundle's patch, e.g.
-   `packages/bundle/web-app/cordis.patch.yml`:
-   ```yaml
-   - id: weather-sky
-     name: '@deepseek-ai/dsh-weather-sky'
-   ```
-3. Add the `"workspace:^"` dependency to that bundle's `package.json`.
-4. Rebuild and restart DSH; every session on that profile gets the overlay and
-   the four conversation tools.
-
-> Note: DSH plugins currently follow the monorepo convention (`workspace:^`
-> deps + Typert codegen tied to the workspace root), so they are distributed
-> with the deployment rather than installed standalone via `npm install`.
-
----
-
-## Conversation tools
-
-| Tool | Purpose | Example |
-| --- | --- | --- |
-| `weather_set_location` | Set the displayed place (geocoded) | "set weather to Beijing" |
-| `weather_set_condition` | Force a weather visual | "show thunder", "snow" |
-| `weather_set_time` | Set a target time (now or future) | "show tomorrow 14:00" |
-| `weather_reset` | Restore auto (IP + current time) | "restore auto weather" |
+- This is a **client-primary** plugin: weather is fetched and rendered in the browser; the host half registers no model tools.
+- DSH external plugins depend on the published `@deepseek-ai/cordis` (`^4.0.1`) and are installed via `dsh plugin --profile <name> add <path>`, without modifying DSH source.
+- On a transient weather/geolocation failure, the overlay keeps the previous frame and retries on the next cycle (15s).
 
 ---
 

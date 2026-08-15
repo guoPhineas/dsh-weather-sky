@@ -6,6 +6,8 @@ A DeepSeek Harness (DSH) Web GUI plugin that overlays a **live weather & sky ani
 
 Weather is fetched **in the browser** from Open-Meteo (no API key), with location resolved via `navigator.geolocation` (falling back to `ipwho.is`).
 
+![](./docs/1.png)
+
 ---
 
 ## Features

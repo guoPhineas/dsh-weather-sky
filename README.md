@@ -6,6 +6,8 @@
 
 天气数据在**浏览器端**直接从 Open-Meteo 获取（无需 API key），通过浏览器定位（`navigator.geolocation`，回退到 `ipwho.is`）确定位置。
 
+![](./docs/1.png)
+
 ---
 
 ## 特性
